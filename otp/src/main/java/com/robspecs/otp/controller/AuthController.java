@@ -37,8 +37,8 @@ public class AuthController {
                    return new ResponseEntity<>("EMAIL IS NOT VERIFIED",HttpStatus.BAD_REQUEST);
 		   
 		   userService.registerNewUser(currDTO.getName()  , currDTO.getEmail(), currDTO.getPassword(), Role.CONSUMER); // Default role USER
-		 String email =   this.redisTemplate.opsForValue().getAndDelete(currDTO.getEmail()); 
-	        return  ResponseEntity.ok(email + " User registered successfully!" );
+		
+	        return  ResponseEntity.ok(" User registered successfully!" );
 	   }
  
 }
