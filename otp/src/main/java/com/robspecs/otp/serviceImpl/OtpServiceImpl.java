@@ -27,7 +27,7 @@ public class OtpServiceImpl implements OtpService {
 
 	
 	@Override
-	public void generateOtp(String email) {
+	public String generateOtp(String email) {
 		     String cooldownKey = email + ":cooldown";
 	        if (Boolean.TRUE.equals(redisTemplate.hasKey(cooldownKey))) {
 	            throw new RuntimeException("Please wait 60 seconds before requesting a new OTP.");
@@ -43,7 +43,7 @@ public class OtpServiceImpl implements OtpService {
 	       
 	        redisTemplate.opsForValue().set(cooldownKey, "1", COOLDOWN_SECONDS, TimeUnit.SECONDS);
 	        
-	        //mail service class(email,message,otp)
+	        return otp;
 	}
 
 	@Override
@@ -70,11 +70,13 @@ public class OtpServiceImpl implements OtpService {
 	          
 	            redisTemplate.delete(email); 
 	            redisTemplate.delete(attemptsKey); 
+	            redisTemplate.opsForValue().set(email, "1");
 	            return true;
 	        } else {
 	           
 	            redisTemplate.opsForValue().increment(attemptsKey);
 	            redisTemplate.expire(attemptsKey, OTP_EXPIRATION_MINUTES, TimeUnit.MINUTES);
+	            redisTemplate.opsForValue().set(email, "0");
 	            throw new RuntimeException("Invalid or expired OTP.");
 	        }
 	}
