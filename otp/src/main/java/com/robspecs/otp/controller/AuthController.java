@@ -27,7 +27,7 @@ public class AuthController {
 	        this.redisTemplate= redisTemplate;
 	    }
 
-	   @PostMapping("/register")
+	   @PostMapping({"/register" ,"/signup"})
 	    public ResponseEntity<?> signup(@RequestBody RegistrationDTO currDTO) {
 
 		   if(Boolean.FALSE.equals(currDTO.isVerified()) || this.redisTemplate.opsForValue().get(currDTO.getEmail()).equals("0")) {

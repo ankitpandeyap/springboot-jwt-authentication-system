@@ -27,8 +27,10 @@ public class JWTAuthenticationEntryPoint implements AuthenticationEntryPoint {
         errorDetails.put("status", HttpServletResponse.SC_UNAUTHORIZED);
         errorDetails.put("error", "Unauthorized");
         errorDetails.put("message", authException.getMessage());
-        errorDetails.put("path", request.getRequestURI());
-
+        errorDetails.put("path", request.getRequestURL().toString());
+        errorDetails.put("exceptionType", authException.getClass().getTypeName());
+        errorDetails.put("client", request.getRemoteAddr());
+        
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
 

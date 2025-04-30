@@ -24,36 +24,39 @@ import com.robspecs.otp.util.JWTUtil;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-    private final CustomUserDetailsService customUserDetailsService;
+	private final JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    @Autowired
-    public SecurityConfig( JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint, JWTValidationFilter JWTValidationFilter,CustomUserDetailsService customUserDetailsService) {
-       this.customUserDetailsService =  customUserDetailsService;
-        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+	@Autowired
+	public SecurityConfig(JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
 
-    }
+		this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
-    }
+	}
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(AuthenticationManager authenticationManager, HttpSecurity http, JWTUtil jwtUtils) throws Exception {
-        JWTAuthenticationFilter authFilter = new JWTAuthenticationFilter(authenticationManager, jwtUtils);
-        JWTValidationFilter    validationFilter =  new JWTValidationFilter(authenticationManager, jwtUtils, customUserDetailsService);
-        return http.csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/api/auth/**").permitAll().anyRequest().authenticated())
-                .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(validationFilter, JWTAuthenticationFilter.class)
-                .build();
-    }
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+		return configuration.getAuthenticationManager();
+	}
 
-    @Bean
-    public static PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+	@Bean
+	public SecurityFilterChain securityFilterChain(AuthenticationManager authenticationManager, HttpSecurity http,
+			JWTUtil jwtUtils,CustomUserDetailsService customUserDetailsService) throws Exception {
+		JWTAuthenticationFilter authFilter = new JWTAuthenticationFilter(authenticationManager, jwtUtils);
+		JWTValidationFilter validationFilter = new JWTValidationFilter(authenticationManager, jwtUtils,
+				customUserDetailsService);
+		return http.csrf(AbstractHttpConfigurer::disable)
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+				.authorizeHttpRequests(
+						auth -> auth.requestMatchers("/api/auth/login","/api/auth/refresh","/api/auth/signup","/api/auth/register",
+								"/api/auth/verify","/api/auth/otp/verify"
+								,"/api/auth/otp/verify").permitAll().anyRequest().authenticated())
+				.addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
+				.addFilterAfter(validationFilter, JWTAuthenticationFilter.class).build();
+	}
+
+	@Bean
+	public static PasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }

@@ -28,11 +28,11 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JWTValidationFilter extends OncePerRequestFilter {
 
 	private final AuthenticationManager authenticationManager;
-    private final JWTUtil jwtUtil;
-    private final CustomUserDetailsService customUserDetailsService;
+	private final JWTUtil jwtUtil;
+	private final CustomUserDetailsService customUserDetailsService;
 
-
-	public JWTValidationFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil,CustomUserDetailsService customUserDetailsService) {
+	public JWTValidationFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil,
+			CustomUserDetailsService customUserDetailsService) {
 		this.authenticationManager = authenticationManager;
 		this.jwtUtil = jwtUtil;
 		this.customUserDetailsService = customUserDetailsService;
@@ -41,34 +41,37 @@ public class JWTValidationFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		// TODO Auto-generated method stub
+
 		try {
-		String token = extractTokenFromRequest(request);
-		String usernameFromToken = jwtUtil.validateAndExtractUsername(token);
-		UserDetails currentUser = customUserDetailsService.loadUserByUsername(usernameFromToken);
-		UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(currentUser.getUsername(),currentUser.getPassword(),
-				currentUser.getAuthorities());
+			String token = extractTokenFromRequest(request);
+			String usernameFromToken = jwtUtil.validateAndExtractUsername(token);
+			UserDetails currentUser = customUserDetailsService.loadUserByUsername(usernameFromToken);
+			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(currentUser, null,
+					currentUser.getAuthorities());
 
-				Authentication authResult = authenticationManager.authenticate(authToken);
-				if(authResult.isAuthenticated()) {
-					SecurityContextHolder.getContext().setAuthentication(authResult);
-				}
+			SecurityContextHolder.getContext().setAuthentication(authToken);
 
-			doFilter(request, response, filterChain);
-		}
-		catch(TokenNotFoundException e) {
-			throw new AuthenticationException(e.getMessage());
-		}catch(MissingClaimException e) {
-			throw new AuthenticationException(e.getMessage());
-		}catch(InvalidClaimException e) {
-			throw new AuthenticationException(e.getMessage());
-		}catch(UsernameNotFoundException e) {
-			throw new AuthenticationException(e.getMessage());
-		}catch(ExpiredJwtException e) {
+		} catch (TokenNotFoundException e) {
+
+			throw new AuthenticationException("Token not found: " + e.getMessage(), e);
+		} catch (MissingClaimException e) {
+
+			throw new AuthenticationException("Missing claim in token: " + e.getMessage(), e);
+		} catch (InvalidClaimException e) {
+
+			throw new AuthenticationException("Invalid claim in token: " + e.getMessage(), e);
+		} catch (UsernameNotFoundException e) {
+
+			throw new AuthenticationException("Username not found: " + e.getMessage(), e);
+		} catch (ExpiredJwtException e) {
+
 			request.setAttribute("expiredToken", true);
 			request.setAttribute("expiredTokenUsername", e.getClaims().getSubject());
+		} catch (Exception e) {
+            System.out.println(e.getLocalizedMessage());
+			throw new AuthenticationException("Authentication failed: " + e.getLocalizedMessage(), e);
+			//coomnce here own exception classes
 		}
-
 		filterChain.doFilter(request, response);
 	}
 
