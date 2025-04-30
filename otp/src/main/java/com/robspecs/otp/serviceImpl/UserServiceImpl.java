@@ -16,10 +16,10 @@ public class UserServiceImpl implements UserService {
 	 private UserRepository userRepository;
 	 private PasswordEncoder passwordEncoder;
 	 private final StringRedisTemplate redisTemplate;
-		
-	 
-	 
-	 
+
+
+
+
 	@Autowired
 	public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,StringRedisTemplate redisTemplate) {
 		super();
@@ -38,14 +38,14 @@ public class UserServiceImpl implements UserService {
 		   if (userRepository.existsByEmail(email)) {
 	            throw new RuntimeException("Email already registered!");
 	        }
-		    
-  
+
+
 	        User user = new User();
 	        user.setName(name);
 	        user.setEmail(email);
 	        user.setPassword(passwordEncoder.encode(rawPassword)); // Always hash password!
 	        user.setRole(role);
-	        this.redisTemplate.opsForValue().getAndDelete(email); 
+	        this.redisTemplate.opsForValue().getAndDelete(email);
 	        return userRepository.save(user);
 	    }
 	}

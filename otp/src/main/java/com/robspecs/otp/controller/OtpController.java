@@ -1,7 +1,6 @@
 package com.robspecs.otp.controller;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +24,7 @@ public class OtpController {
 
 	@PostMapping("/request")
 	public ResponseEntity<?> requestOtp(@RequestParam String email) {
-		
+
 		try {
 			String otp = otpService.generateOtp(email);
 			mailService.sendOtpEmail(email, otp);
@@ -34,7 +33,7 @@ public class OtpController {
 		} catch (Exception e) {
 			return ResponseEntity.status(HttpStatus.TOO_EARLY).body(e.getLocalizedMessage());
 		}
-		
+
 	}
 
 	@PostMapping("/verify")

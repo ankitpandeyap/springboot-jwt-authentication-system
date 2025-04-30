@@ -1,13 +1,9 @@
 package com.robspecs.otp.entity;
 
-import java.util.Set;
-
 import com.robspecs.otp.enums.Role;
 
 import jakarta.persistence.Column;
-
 import jakarta.persistence.Entity;
-
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,16 +17,16 @@ public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-    
+
 	private String name;
-	
+
 	@Column(unique = true, nullable = false)
 	private String email;
 
 	@Column(nullable = false)
 	private String password;
 
-	
+
 	private Role role;
 
 	private boolean enabled; // After OTP verification
@@ -45,13 +41,13 @@ public class User {
 		this.role = role;
 		this.enabled = enabled;
 	}
-  
+
 	// Getters and Setters
 	public Long getId() {
 		return id;
 	}
-	
-	
+
+
 
 	public String getName() {
 		return name;

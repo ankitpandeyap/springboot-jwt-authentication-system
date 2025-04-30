@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -35,7 +35,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		if (!request.getServletPath().equals("/api/auth/login")) {
-			doFilter(request, response, filterChain);
+			filterChain.doFilter(request, response);
 			return;
 		}
 
@@ -61,12 +61,15 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 				refreshCookie.setMaxAge(7 * 24 * 60 * 60);
 				response.addCookie(refreshCookie);
 				response.setContentType("application/json");
-		        response.getWriter().write("{\"message\":\"Login successful\"}");
+				response.getWriter().write("{\"message\":\"Login successful\"}");
 			}
 
+		} catch (AuthenticationException e) {
+			throw e;
 		} catch (Exception e) {
-
-			e.getLocalizedMessage();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.setContentType("application/json");
+			response.getWriter().write("{\"error\":\"Internal server error\"}");
 		}
 	}
 

@@ -7,7 +7,7 @@ public class RegistrationDTO {
   private String role;
   private String email;
   private Boolean isVerified;
-  
+
 
 public Boolean isVerified() {
 	return isVerified;
@@ -39,7 +39,7 @@ public String getEmail() {
 public void setEmail(String email) {
 	this.email = email;
 }
-  
-  
-	
+
+
+
 }

@@ -6,8 +6,9 @@ import java.util.Date;
 
 import org.springframework.stereotype.Component;
 
-import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.IncorrectClaimException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MissingClaimException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
@@ -32,8 +33,9 @@ public class JWTUtil {
 					parseClaimsJws(token).
 					getBody().
 					getSubject();
-		} catch (JwtException | IllegalArgumentException  e) {
-			return "";
+		} catch (MissingClaimException | IncorrectClaimException | IllegalArgumentException  e) {
+			throw e;
+
 		}
 	}
 
