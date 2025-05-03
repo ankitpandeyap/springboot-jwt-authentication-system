@@ -50,13 +50,13 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
 			if (authResult.isAuthenticated()) {
 
-				String token = jwtUtil.generateToken(authResult.getName(), 15); // 15min
+				String token = jwtUtil.generateToken(authResult.getName(), 1); // 15min
 				response.setHeader("Authorization", "Bearer " + token);
 
 				String refreshToken = jwtUtil.generateToken(authResult.getName(), 7 * 24 * 60);
 				Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
 				refreshCookie.setHttpOnly(true);
-				refreshCookie.setSecure(false); 
+				refreshCookie.setSecure(false);
 				refreshCookie.setPath("/api/auth/refresh"); // Required for cookie to be sent to all endpoints
 				refreshCookie.setMaxAge(7 * 24 * 60 * 60);
 				response.addCookie(refreshCookie);

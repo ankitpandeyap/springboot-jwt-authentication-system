@@ -14,15 +14,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.robspecs.otp.security.CustomUserDetailsService;
-import com.robspecs.otp.security.JWTAuthenticationEntryPoint;
-import com.robspecs.otp.security.JWTAuthenticationFilter;
-import com.robspecs.otp.security.JWTValidationFilter;
+import com.robspecs.otp.security.*;
 import com.robspecs.otp.util.JWTUtil;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+   
 
 	private final JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
@@ -30,6 +29,8 @@ public class SecurityConfig {
 	public SecurityConfig(JWTAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
 
 		this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+
+		
 
 	}
 
@@ -40,19 +41,26 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(AuthenticationManager authenticationManager, HttpSecurity http,
-			JWTUtil jwtUtils,CustomUserDetailsService customUserDetailsService) throws Exception {
+			JWTUtil jwtUtils, CustomUserDetailsService customUserDetailsService) throws Exception {
+		
 		JWTAuthenticationFilter authFilter = new JWTAuthenticationFilter(authenticationManager, jwtUtils);
+		
 		JWTValidationFilter validationFilter = new JWTValidationFilter(authenticationManager, jwtUtils,
 				customUserDetailsService);
+		
+		JWTRefreshFilter jwtRefreshFilter =  new JWTRefreshFilter(authenticationManager, jwtUtils, customUserDetailsService);
+		
 		return http.csrf(AbstractHttpConfigurer::disable)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
-				.authorizeHttpRequests(
-						auth -> auth.requestMatchers("/api/auth/login","/api/auth/refresh","/api/auth/signup","/api/auth/register",
-								"/api/auth/verify","/api/auth/otp/verify"
-								,"/api/auth/otp/verify").permitAll().anyRequest().authenticated())
+				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/signup",
+								"/api/auth/register", "/api/auth/otp/verify", "/api/auth/otp/request")
+						.permitAll().anyRequest().authenticated())
 				.addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
-				.addFilterAfter(validationFilter, JWTAuthenticationFilter.class).build();
+				.addFilterAfter(validationFilter, JWTAuthenticationFilter.class)
+				.addFilterAfter(jwtRefreshFilter,validationFilter.getClass())
+				.build();
 	}
 
 	@Bean

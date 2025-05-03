@@ -22,7 +22,8 @@ public class JWTAuthenticationEntryPoint implements AuthenticationEntryPoint {
 	public void commence(HttpServletRequest request, HttpServletResponse response,
 			AuthenticationException authException) throws IOException, ServletException {
 		// TODO Auto-generated method stub
-        Map<String, Object> errorDetails = new HashMap<>();
+
+		Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("timestamp", LocalDateTime.now().toString());
         errorDetails.put("status", HttpServletResponse.SC_UNAUTHORIZED);
         errorDetails.put("error", "Unauthorized");
@@ -30,7 +31,7 @@ public class JWTAuthenticationEntryPoint implements AuthenticationEntryPoint {
         errorDetails.put("path", request.getRequestURL().toString());
         errorDetails.put("exceptionType", authException.getClass().getTypeName());
         errorDetails.put("client", request.getRemoteAddr());
-        
+
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
 

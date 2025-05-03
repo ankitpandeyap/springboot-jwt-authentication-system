@@ -11,6 +11,6 @@ public class Temp {
 	public String secureEndpoint() {
 	    return "This is a protected endpoint";
 	}
-	
-	
+
+
 }
