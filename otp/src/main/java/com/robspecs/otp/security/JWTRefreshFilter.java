@@ -5,12 +5,15 @@ import java.io.IOException;
 import javax.security.sasl.AuthenticationException;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.robspecs.otp.exception.JWTBlackListedTokenException;
+import com.robspecs.otp.service.TokenBlacklistService;
 import com.robspecs.otp.util.JWTUtil;
 
 import jakarta.servlet.FilterChain;
@@ -25,12 +28,14 @@ public class JWTRefreshFilter extends OncePerRequestFilter {
 	private final AuthenticationManager authenticationManager;
 	private final JWTUtil jwtUtil;
 	private final CustomUserDetailsService customUserDetailsService;
+	private final TokenBlacklistService tokenService;
 
 	public JWTRefreshFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil,
-			CustomUserDetailsService customUserDetailsService) {
+			CustomUserDetailsService customUserDetailsService, TokenBlacklistService tokenService) {
 		this.authenticationManager = authenticationManager;
 		this.jwtUtil = jwtUtil;
 		this.customUserDetailsService = customUserDetailsService;
+		this.tokenService = tokenService;
 	}
 
 	@Override
@@ -40,12 +45,10 @@ public class JWTRefreshFilter extends OncePerRequestFilter {
 		boolean isRefreshRequest = request.getServletPath().equals("/api/auth/refresh");
 		boolean isAuthenticated = SecurityContextHolder.getContext().getAuthentication() != null;
 
-
 		// If token is NOT expired AND user is authenticated OR it's NOT a refresh call
-		if (((isExpiredToken == null || !isExpiredToken) && isAuthenticated) 
-			    || isRefreshRequest)  {
-		    filterChain.doFilter(request, response);
-		    return;
+		if (((isExpiredToken == null || !isExpiredToken) && isAuthenticated) || isRefreshRequest) {
+			filterChain.doFilter(request, response);
+			return;
 		}
 
 		try {
@@ -55,28 +58,32 @@ public class JWTRefreshFilter extends OncePerRequestFilter {
 			if (refreshToken == null) {
 				throw new AuthenticationException("Refresh Token is Invalid or not present");
 			}
+
+			if (tokenService.isBlacklisted(refreshToken)) {
+				// scope for improvement
+				throw new JWTBlackListedTokenException("Acess token is Blacklisted");
+			}
 			String usernameFromRefreshToken = jwtUtil.validateAndExtractUsername(refreshToken);
 			if (!usernameFromAccessToken.equals(usernameFromRefreshToken)) {
 				throw new AuthenticationException("Refresh Token is Invalid or not present");
 			}
 
 			UserDetails userDetails = customUserDetailsService.loadUserByUsername(usernameFromRefreshToken);
-			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-					userDetails, null, userDetails.getAuthorities());
+			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null,
+					userDetails.getAuthorities());
 
 			String newAccessToken = jwtUtil.generateToken(userDetails.getUsername(), 15);
 
-
 			response.setHeader("Authorization", "Bearer " + newAccessToken);
 
-			SecurityContextHolder.getContext().setAuthentication( authToken);
+			SecurityContextHolder.getContext().setAuthentication(authToken);
 
 			filterChain.doFilter(request, response);
 
 		} catch (Exception e) {
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			response.getWriter().write("Refresh Token is Inavlaid or Expired 	 " + e.getMessage());
-			return;
+			request.setAttribute("custom-error", "Refresh Token Invalid or Expired: " + e.getMessage());
+			request.setAttribute("custom-exception", "JWTRefreshTokenException");
+			throw new BadCredentialsException("Refresh token failure");
 		}
 	}
 
@@ -89,6 +96,7 @@ public class JWTRefreshFilter extends OncePerRequestFilter {
 		for (Cookie cookie : cookies) {
 			if ("refreshToken".equals(cookie.getName())) {
 				refreshToken = cookie.getValue();
+				break;
 			}
 		}
 		return refreshToken;

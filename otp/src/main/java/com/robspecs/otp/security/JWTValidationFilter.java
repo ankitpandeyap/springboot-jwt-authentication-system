@@ -3,6 +3,7 @@ package com.robspecs.otp.security;
 import java.io.IOException;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,11 +12,14 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.robspecs.otp.exception.JWTBlackListedTokenException;
 import com.robspecs.otp.exception.JWTTokenInvalidClaimException;
 import com.robspecs.otp.exception.JWTTokenMissingClaimException;
 import com.robspecs.otp.exception.JWTTokenNotFoundException;
 import com.robspecs.otp.exception.JWTTokenUsernameNotFoundException;
 import com.robspecs.otp.exception.TokenNotFoundException;
+import com.robspecs.otp.service.TokenBlacklistService;
+import com.robspecs.otp.serviceImpl.TokenBlacklistServiceImpl;
 import com.robspecs.otp.util.JWTUtil;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -33,12 +37,14 @@ public class JWTValidationFilter extends OncePerRequestFilter {
 	private final AuthenticationManager authenticationManager;
 	private final JWTUtil jwtUtil;
 	private final CustomUserDetailsService customUserDetailsService;
+	private final TokenBlacklistService tokenService;
 
 	public JWTValidationFilter(AuthenticationManager authenticationManager, JWTUtil jwtUtil,
-			CustomUserDetailsService customUserDetailsService) {
+			CustomUserDetailsService customUserDetailsService, TokenBlacklistService tokenService) {
 		this.authenticationManager = authenticationManager;
 		this.jwtUtil = jwtUtil;
 		this.customUserDetailsService = customUserDetailsService;
+		this.tokenService = tokenService;
 	}
 
 	@Override
@@ -47,6 +53,10 @@ public class JWTValidationFilter extends OncePerRequestFilter {
 
 		try {
 			String token = extractTokenFromRequest(request);
+			if (tokenService.isBlacklisted(token)) {
+				// scope for improvement
+				throw new JWTBlackListedTokenException("Acess token is Blacklisted");
+			}
 			String usernameFromToken = jwtUtil.validateAndExtractUsername(token);
 			UserDetails currentUser = customUserDetailsService.loadUserByUsername(usernameFromToken);
 			UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(currentUser, null,
@@ -56,24 +66,38 @@ public class JWTValidationFilter extends OncePerRequestFilter {
 			SecurityContextHolder.getContext().setAuthentication(authToken);
 
 		} catch (TokenNotFoundException e) {
+			request.setAttribute("custom-error", "Token not found: " + e.getMessage());
+			request.setAttribute("custom-exception", "JWTTokenNotFoundException");
+			throw new BadCredentialsException("Token not found");
 
-			throw new JWTTokenNotFoundException("Token not found: " + e.getMessage());
 		} catch (MissingClaimException e) {
+			request.setAttribute("custom-error", "Missing claim in token: " + e.getMessage());
+			request.setAttribute("custom-exception", "JWTTokenMissingClaimException");
+			throw new BadCredentialsException("Missing claim in token");
 
-			throw new JWTTokenMissingClaimException("Missing claim in token: " + e.getMessage());
 		} catch (InvalidClaimException e) {
+			request.setAttribute("custom-error", "Invalid claim in token: " + e.getMessage());
+			request.setAttribute("custom-exception", "JWTTokenInvalidClaimException");
+			throw new BadCredentialsException("Invalid claim");
 
-			throw new JWTTokenInvalidClaimException("Invalid claim in token: " + e.getMessage());
 		} catch (UsernameNotFoundException e) {
+			request.setAttribute("custom-error", "Username not found: " + e.getMessage());
+			request.setAttribute("custom-exception", "JWTTokenUsernameNotFoundException");
+			throw new BadCredentialsException("Username not found");
 
-			throw new JWTTokenUsernameNotFoundException("Username not found: " + e.getMessage());
 		} catch (ExpiredJwtException e) {
-
 			request.setAttribute("expiredToken", true);
 			request.setAttribute("expiredTokenUsername", e.getClaims().getSubject());
+
 		} catch (JwtException e) {
-			throw new RuntimeException(e);
-			// coomnce here own exception classes
+			request.setAttribute("custom-error", "JWT parsing error: " + e.getMessage());
+			request.setAttribute("custom-exception", "JWTGeneralParsingException");
+			throw new BadCredentialsException("Invalid JWT token");
+
+		} catch (Exception e) {
+			request.setAttribute("custom-error", "Unhandled authentication error: " + e.getMessage());
+			request.setAttribute("custom-exception", "UnexpectedAuthenticationException");
+			throw new BadCredentialsException("Unexpected error");
 		}
 		filterChain.doFilter(request, response);
 	}

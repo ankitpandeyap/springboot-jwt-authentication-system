@@ -3,6 +3,7 @@ package com.robspecs.otp.security;
 import java.io.IOException;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -50,7 +51,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
 			if (authResult.isAuthenticated()) {
 
-				String token = jwtUtil.generateToken(authResult.getName(), 1); // 15min
+				String token = jwtUtil.generateToken(authResult.getName(), 15); // 15min
 				response.setHeader("Authorization", "Bearer " + token);
 
 				String refreshToken = jwtUtil.generateToken(authResult.getName(), 7 * 24 * 60);
@@ -64,13 +65,10 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 				response.getWriter().write("{\"message\":\"Login successful\"}");
 			}
 
-		} catch (AuthenticationException e) {
-			throw e;
 		} catch (Exception e) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.setContentType("application/json");
-			response.getWriter().write("{\"error\":\"Internal server error\"}");
+			request.setAttribute("custom-error", "Refresh Token Invalid or Expired: " + e.getMessage());
+			request.setAttribute("custom-exception", "JWTRefreshTokenException");
+			throw new BadCredentialsException("Refresh token failure");
 		}
 	}
-
 }

@@ -12,10 +12,18 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.robspecs.otp.security.*;
+import com.robspecs.otp.security.CustomUserDetailsService;
+import com.robspecs.otp.security.JWTAuthenticationEntryPoint;
+import com.robspecs.otp.security.JWTAuthenticationFilter;
+import com.robspecs.otp.security.JWTRefreshFilter;
+import com.robspecs.otp.security.JWTValidationFilter;
+import com.robspecs.otp.service.TokenBlacklistService;
 import com.robspecs.otp.util.JWTUtil;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 @EnableWebSecurity
@@ -41,18 +49,19 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(AuthenticationManager authenticationManager, HttpSecurity http,
-			JWTUtil jwtUtils, CustomUserDetailsService customUserDetailsService) throws Exception {
+			JWTUtil jwtUtils, CustomUserDetailsService customUserDetailsService, TokenBlacklistService tokenService) throws Exception {
 		
 		JWTAuthenticationFilter authFilter = new JWTAuthenticationFilter(authenticationManager, jwtUtils);
 		
 		JWTValidationFilter validationFilter = new JWTValidationFilter(authenticationManager, jwtUtils,
-				customUserDetailsService);
+				customUserDetailsService,tokenService);
 		
-		JWTRefreshFilter jwtRefreshFilter =  new JWTRefreshFilter(authenticationManager, jwtUtils, customUserDetailsService);
+		JWTRefreshFilter jwtRefreshFilter =  new JWTRefreshFilter(authenticationManager, jwtUtils, customUserDetailsService,tokenService);
 		
 		return http.csrf(AbstractHttpConfigurer::disable)
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+				.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)
+						.accessDeniedHandler(accessDeniedHandler()))
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/api/auth/login", "/api/auth/refresh", "/api/auth/signup",
 								"/api/auth/register", "/api/auth/otp/verify", "/api/auth/otp/request")
@@ -66,5 +75,14 @@ public class SecurityConfig {
 	@Bean
 	public static PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
+	}
+	
+	@Bean
+	public AccessDeniedHandler accessDeniedHandler() {
+	    return (request, response, accessDeniedException) -> {
+	        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+	        response.setContentType("application/json");
+	        response.getWriter().write("{\"error\": \"Access Denied!\"}");
+	    };
 	}
 }
