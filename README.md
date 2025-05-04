@@ -1,66 +1,65 @@
-SpringBoot-JWT-Authentication-System with OTP Verification
+🔐 SpringBoot JWT Authentication System with OTP Verification
+-
 
-This backend system is built using Spring Boot and implements a secure authentication and authorization mechanism. It supports email-based OTP verification during registration, JWT token-based login, refresh token support, token blacklisting via Redis, and role-based access control.
+A robust and secure backend system built with Spring Boot, featuring OTP-based registration, JWT access & refresh token handling, token blacklisting with Redis, and secure role-based access — all optimized for production deployment.
+---------------------------------------------------------------------------------
+📌 Features
+-
 
-🔧 Features
+🔑 OTP verification during user registration (via email)
 
-✅ User Registration with Email OTP Verification
+🛡️ JWT-based login with access & refresh tokens
 
-✅ Login with JWT Token Generation
+♻️ Token refresh endpoint with auto-blacklisting of expired tokens
 
-✅ Refresh Token and Access Token Handling
+🚪 Secure logout invalidating both tokens (Redis-backed)
 
-✅ Token Blacklisting using Redis
+👥 Role-based access control using annotations
 
-✅ Secure Logout Mechanism
+📧 SMTP email integration for OTP delivery
 
-✅ Role-Based Access Control (via annotations)
+🗃️ Redis integration via Docker for session/token handling
 
-✅ Redis Docker Integration for Session and Token Management
+🌍 CORS configuration for cross-origin frontend communication
 
-✅ SMTP Integration for Sending OTPs (Email)
+🧱 Production-ready configuration (HTTPS, logging, secrets management)
 
-🔐 CORS Configuration for Frontend Communication
+------------------------------------------------------------------------------------
+🛠️ Tech Stack
+-
+| Layer       | Technology                  |
+| ----------- | --------------------------- |
+| Backend     | Spring Boot 3.x             |
+| Auth        | Spring Security, JWT (jjwt) |
+| Data Store  | MySQL                       |
+| Token Store | Redis (Dockerized)          |
+| Email       | Jakarta Mail (SMTP)         |
+| Build Tool  | Maven                       |
+| Java        | Java 17+                    |
 
-🌐 Ready for HTTPS and Secure Deployment
+----------------------------------------------------------
+📦 Prerequisites
+-
 
-🧰 Tech Stack
+✅ Java JDK 17+
 
-Java 17
+✅ Maven 3.8+
 
-Spring Boot 3.x
+✅ MySQL (running locally or in Docker)
 
-Spring Security
+✅ Docker (for Redis container)
 
-Redis (via Docker)
+✅ Internet connection (SMTP email service)
 
-MySQL
-
-Jakarta Mail (SMTP)
-
-JWT (Access and Refresh tokens)
-
-Maven
-
-📝 Prerequisites
-
-Make sure you have the following installed:
-
-Java 17+
-
-Maven 3.8+
-
-Docker (for Redis)
-
-MySQL (Running locally or in Docker)
-
+--------------------
 🐳 Redis Setup with Docker
-
-Run the following command:
+-
 
 docker run --name redis-auth -p 6379:6379 -d redis
 
-📧 SMTP Setup for OTP
+-----------------------------------
+📧 SMTP Setup for OTP Delivery
+-
 
 Update your application.properties:
 
@@ -71,68 +70,116 @@ spring.mail.password=your-app-password
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
-Make sure to use an App Password if you're using Gmail.
+⚠️ Use an App Password (not your Gmail login password) to avoid authentication issues.
 
-⚙️ Application Properties (Important Snippets)
+---------------------------------------------------------------------
+⚙️ Core Configuration
+-
 
-jwt.secret=your-secret-key
 redis.host=localhost
 redis.port=6379
-
 
 cors.allowed.origins=http://localhost:3000
 cors.allowed.methods=GET,POST,PUT,DELETE
 cors.allowed.headers=*
 cors.allowed.credentials=true
 
-📂 Module Breakdown
+--------------------------------
+🧱 Module Structure
+--------------------
 
-🔐 Authentication
 
-OTP Registration
+🔐 Authentication Flow
+--------------
 
-JWT Access/Refresh Token Login
+Register: Email OTP verification before saving the user
 
-Refresh Token Endpoint
+Login: Returns access & refresh tokens
 
-Token Validation Endpoint
+Token Validation: Validates JWT via filters
 
-🧼 Logout
+Token Refresh: Issues new access token using refresh token
 
-Access & Refresh token blacklisting using Redis
+🚪 Logout
+-------
 
-🧾 Token Management
+Blacklists both access & refresh tokens via Redis
 
-Custom Filters for login, validation, refresh
+Clears Security Context
 
-Filters check for blacklisted tokens
+🧾 Token Filters
+---
 
-🎯 Role-Based Access
+JWTAuthenticationFilter: Login
 
-Use @PreAuthorize("hasRole('ADMIN')") in controller methods
+JWTValidationFilter: Validates access token
 
-🚀 Deployment Readiness
+JWTRefreshFilter: Refresh token logic
 
-To prepare for production:
+All filters check Redis for blacklisted tokens
 
-✅ Enable HTTPS in Spring Boot
+🔒 Role-Based Authorization
+------
 
-✅ Use Env Variables for Secrets
+Use annotations in controller:
 
-✅ Secure Redis with Auth
+@PreAuthorize("hasRole('ADMIN')")
+@GetMapping("/admin/data")
+public ResponseEntity<?> getAdminData() {
+    // Only accessible by admin role
+}
 
-✅ Restrict CORS to production domains
+-------------------------------
+🚀 Production-Ready Practices
+----
 
-✅ Move mail credentials to environment or secrets manager
+🔐 HTTPS support (to be added during deployment)
 
-✅ Add centralized logging (SLF4J + Logback)
+🔑 Move secrets (DB, mail, jwt) to env variables or secrets manager
 
-🔜 To Do (Post-Frontend)
+🔒 Secure Redis with password if exposed outside
 
+🌐 Restrict CORS to production domains
+
+📊 Logging with SLF4J + Logback (pending addition)
+
+🛡️ Token revocation and Redis TTLs for cleanup
+
+-----------------------
+
+✅ Completed ✅
+---
+✅ OTP Registration Flow
+
+✅ Login with JWT
+
+✅ Refresh Token Mechanism
+
+✅ Token Validation Filter
+
+✅ Logout & Token Blacklisting
+
+✅ Redis + SMTP Integration
+
+✅ CORS Configuration
+
+
+🧩 To Do (Optional Enhancements)
+---
+ Add Swagger/OpenAPI documentation
+
+ Add logging (SLF4J, Logback) — In Progress
+
+ Enable HTTPS (during production deployment)
+
+ Add monitoring (Prometheus/Grafana optional)
+
+ React.js frontend integration
 
 
 🧑‍💻 Author
-
-Ankit PandeyGitHub • LinkedIn (https://www.linkedin.com/in/ankitpandeyap/)
-
-
+--
+Ankit Pandey • LinkedIn (https://www.linkedin.com/in/ankitpandeyap/)
+-
+GitHub: @ankitpandeyap
+-
