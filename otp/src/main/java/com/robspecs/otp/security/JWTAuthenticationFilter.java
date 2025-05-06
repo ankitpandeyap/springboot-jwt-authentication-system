@@ -7,6 +7,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -48,7 +49,11 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 					loginRequest.getUsername(), loginRequest.getPassword());
 
 			Authentication authResult = authenticationManager.authenticate(authToken);
-
+             
+			UserDetails userDetails = (UserDetails) authResult.getPrincipal();
+			if(userDetails.isEnabled() == false) throw new Exception("Profile not verified Re-Verfiy Profile");
+			 
+			
 			if (authResult.isAuthenticated()) {
 
 				String token = jwtUtil.generateToken(authResult.getName(), 15); // 15min
@@ -66,8 +71,8 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 			}
 
 		} catch (Exception e) {
-			request.setAttribute("custom-error", "Refresh Token Invalid or Expired: " + e.getMessage());
-			request.setAttribute("custom-exception", "JWTRefreshTokenException");
+			request.setAttribute("custom-error", e.getMessage());
+			request.setAttribute("custom-exception", e.getClass().getName());
 			throw new BadCredentialsException("Refresh token failure");
 		}
 	}

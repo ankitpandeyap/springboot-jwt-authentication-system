@@ -45,11 +45,11 @@ public class AuthController {
 	public ResponseEntity<?> signup(@RequestBody RegistrationDTO currDTO) {
 
 		if (Boolean.FALSE.equals(currDTO.isVerified())
-				|| this.redisTemplate.opsForValue().get(currDTO.getEmail()).equals("0")) {
-			return new ResponseEntity<>("EMAIL IS NOT VERIFIED", HttpStatus.BAD_REQUEST);
+				|| this.redisTemplate.opsForValue().get(currDTO.getEmail()) == null || this.redisTemplate.opsForValue().get(currDTO.getEmail()).equals("0")) {
+			return new ResponseEntity<>("EMAIL IS NOT VERIFIED, REGISTER AGAIN", HttpStatus.BAD_REQUEST);
 		}
 
-		userService.registerNewUser(currDTO.getName(), currDTO.getEmail(), currDTO.getPassword(), Role.CONSUMER); // Default
+		userService.registerNewUser(currDTO); // Default
 																													// role
 																													// USER
 
@@ -62,6 +62,8 @@ public class AuthController {
 		return "Token is valid ✅";
 	}
 
+	
+	
 	@PostMapping("/logout")
 	public ResponseEntity<?> logoutUser(HttpServletRequest request, HttpServletResponse response,
 			Authentication authentication) throws RuntimeException {

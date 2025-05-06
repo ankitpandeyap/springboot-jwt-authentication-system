@@ -5,6 +5,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.robspecs.otp.dto.RegistrationDTO;
 import com.robspecs.otp.entity.User;
 import com.robspecs.otp.enums.Role;
 import com.robspecs.otp.repository.UserRepository;
@@ -33,18 +34,23 @@ public class UserServiceImpl implements UserService {
 
 
 	@Override
-	public User registerNewUser(String name, String email, String rawPassword, Role role) {
+	public User registerNewUser(RegistrationDTO currDTO) {
 		// TODO Auto-generated method stub
+		   String email =  currDTO.getEmail();
 		   if (userRepository.existsByEmail(email)) {
-	            throw new RuntimeException("Email already registered!");
-	        }
-
-
+	           User user =  userRepository.findByEmail(email).get();
+	           if(user.isEnabled())
+			   throw new RuntimeException("Email already registered!");
+	          
+		   }
+            Role role  = currDTO.getRole().equalsIgnoreCase("Consumer") ? Role.CONSUMER : Role.ADMIN;
+   
 	        User user = new User();
-	        user.setName(name);
+	        user.setName(currDTO.getName());
 	        user.setEmail(email);
-	        user.setPassword(passwordEncoder.encode(rawPassword)); // Always hash password!
+	        user.setPassword(passwordEncoder.encode(currDTO.getPassword())); // Always hash password!
 	        user.setRole(role);
+	        user.setEnabled(true);
 	        this.redisTemplate.opsForValue().getAndDelete(email);
 	        return userRepository.save(user);
 	    }
