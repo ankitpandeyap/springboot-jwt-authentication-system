@@ -6,15 +6,10 @@ public class RegistrationDTO {
   private String password;
   private String role;
   private String email;
-  private Boolean isVerified;
+ 
 
 
-public Boolean isVerified() {
-	return isVerified;
-}
-public void setVerified(Boolean isVerified) {
-	this.isVerified = isVerified;
-}
+
 public String getName() {
 	return name;
 }

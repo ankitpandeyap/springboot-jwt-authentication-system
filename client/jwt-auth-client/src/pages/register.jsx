@@ -2,20 +2,22 @@ import React, { useState } from 'react';
 import axios from 'axios';
 
 export default function Register() {
-  // Step 1: State variables for form input
+  // State variables
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState(1); // Step 1 = Register, Step 2 = Enter OTP
   const [message, setMessage] = useState('');
+  const [otpVerified, setOtpVerified] = useState(false); // New state to track OTP verification
 
+  // Step 1: Send OTP
   const handleSendOtp = async (e) => {
     e.preventDefault();
     try {
       const res = await axios.post('http://localhost:8082/api/auth/otp/request', { email });
       setMessage(res.data.message);
-      setStep(2);
+      setStep(2); // Go to OTP verification step
     } catch (err) {
       setMessage(err.response?.data?.message || 'Failed to send OTP');
     }
@@ -28,7 +30,8 @@ export default function Register() {
       const res = await axios.post('http://localhost:8082/api/auth/verify', { email, otp });
       setMessage(res.data.message);
       if (res.data.message === 'Otp verified') {
-        setStep(3); // move to registration form
+        setOtpVerified(true); // Mark OTP as verified
+        setStep(3); // Move to registration form
       }
     } catch (err) {
       setMessage(err.response?.data?.message || 'Invalid OTP');
@@ -38,6 +41,10 @@ export default function Register() {
   // Step 3: Register user
   const handleRegister = async (e) => {
     e.preventDefault();
+    if (!otpVerified) {
+      setMessage('Please verify OTP first.');
+      return;
+    }
     try {
       const res = await axios.post('http://localhost:8080/api/auth/register', {
         email,
@@ -93,7 +100,7 @@ export default function Register() {
           </form>
         )}
 
-        {step === 3 && (
+        {step === 3 && otpVerified && (
           <form onSubmit={handleRegister} className="space-y-4">
             <input
               type="text"

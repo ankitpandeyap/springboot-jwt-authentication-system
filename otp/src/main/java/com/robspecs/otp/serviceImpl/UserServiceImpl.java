@@ -14,46 +14,43 @@ import com.robspecs.otp.service.UserService;
 @Service
 public class UserServiceImpl implements UserService {
 
-	 private UserRepository userRepository;
-	 private PasswordEncoder passwordEncoder;
-	 private final StringRedisTemplate redisTemplate;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final StringRedisTemplate redisTemplate;
 
+    @Autowired
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, StringRedisTemplate redisTemplate) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.redisTemplate = redisTemplate;
+    }
 
+    @Override
+    public User registerNewUser(RegistrationDTO currDTO) {
+        String email = currDTO.getEmail();
 
+        // If email already exists and is enabled, reject registration
+        if (userRepository.existsByEmail(email)) {
+            User existingUser = userRepository.findByEmail(email).orElse(null);
+            if (existingUser != null && existingUser.isEnabled()) {
+                throw new RuntimeException("Email already registered!");
+            }
+        }
 
-	@Autowired
-	public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder,StringRedisTemplate redisTemplate) {
-		super();
-		this.userRepository = userRepository;
-		this.passwordEncoder = passwordEncoder;
-		this.redisTemplate = redisTemplate;
-	}
+        // Check for role (default = CONSUMER if not ADMIN)
+        Role role = currDTO.getRole().equalsIgnoreCase("ADMIN") ? Role.ADMIN : Role.CONSUMER;
 
+        // Create and save user
+        User user = new User();
+        user.setName(currDTO.getName());
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(currDTO.getPassword())); // Always encode passwords!
+        user.setRole(role);
+        user.setEnabled(true);
 
+        // Delete OTP from Redis after successful registration
+        redisTemplate.delete(email);
 
-
-
-	@Override
-	public User registerNewUser(RegistrationDTO currDTO) {
-		// TODO Auto-generated method stub
-		   String email =  currDTO.getEmail();
-		   if (userRepository.existsByEmail(email)) {
-	           User user =  userRepository.findByEmail(email).get();
-	           if(user.isEnabled())
-			   throw new RuntimeException("Email already registered!");
-	          
-		   }
-            Role role  = currDTO.getRole().equalsIgnoreCase("Consumer") ? Role.CONSUMER : Role.ADMIN;
-   
-	        User user = new User();
-	        user.setName(currDTO.getName());
-	        user.setEmail(email);
-	        user.setPassword(passwordEncoder.encode(currDTO.getPassword())); // Always hash password!
-	        user.setRole(role);
-	        user.setEnabled(true);
-	        this.redisTemplate.opsForValue().getAndDelete(email);
-	        return userRepository.save(user);
-	    }
-	}
-
-
+        return userRepository.save(user);
+    }
+}

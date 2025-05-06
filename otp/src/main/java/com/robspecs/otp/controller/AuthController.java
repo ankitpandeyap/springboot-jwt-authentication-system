@@ -43,17 +43,14 @@ public class AuthController {
 
 	@PostMapping({ "/register", "/signup" })
 	public ResponseEntity<?> signup(@RequestBody RegistrationDTO currDTO) {
+	    String otpVerified = redisTemplate.opsForValue().get(currDTO.getEmail());
 
-		if (Boolean.FALSE.equals(currDTO.isVerified())
-				|| this.redisTemplate.opsForValue().get(currDTO.getEmail()) == null || this.redisTemplate.opsForValue().get(currDTO.getEmail()).equals("0")) {
-			return new ResponseEntity<>("EMAIL IS NOT VERIFIED, REGISTER AGAIN", HttpStatus.BAD_REQUEST);
-		}
+	    if (!"1".equals(otpVerified)) {
+	        return new ResponseEntity<>("EMAIL IS NOT VERIFIED, REGISTER AGAIN", HttpStatus.BAD_REQUEST);
+	    }
 
-		userService.registerNewUser(currDTO); // Default
-																													// role
-																													// USER
-
-		return ResponseEntity.ok(" User registered successfully!");
+	    userService.registerNewUser(currDTO);
+	    return ResponseEntity.ok("User registered successfully!");
 	}
 
 	// APIS FOR VLAIDATIONG HTE TOKEN

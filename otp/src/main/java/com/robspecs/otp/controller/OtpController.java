@@ -14,41 +14,36 @@ import com.robspecs.otp.service.OtpService;
 @RequestMapping("/api/auth/otp")
 public class OtpController {
 
-	private final OtpService otpService;
-	private final MailService mailService;
+    private final OtpService otpService;
+    private final MailService mailService;
 
-	public OtpController(OtpService otpService, MailService mailService) {
-		this.otpService = otpService;
-		this.mailService = mailService;
-	}
+    public OtpController(OtpService otpService, MailService mailService) {
+        this.otpService = otpService;
+        this.mailService = mailService;
+    }
 
-	@PostMapping("/request")
-	public ResponseEntity<?> requestOtp(@RequestParam String email) {
+    @PostMapping("/request")
+    public ResponseEntity<?> requestOtp(@RequestParam String email) {
+        try {
+            String otp = otpService.generateOtp(email);
+            mailService.sendOtpEmail(email, otp);
+            return ResponseEntity.ok("OTP sent to " + email);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to send OTP: " + e.getMessage());
+        }
+    }
 
-		try {
-			String otp = otpService.generateOtp(email);
-			mailService.sendOtpEmail(email, otp);
-			return ResponseEntity.ok("OTP sent to " + email);
-
-		} catch (Exception e) {
-			return ResponseEntity.status(HttpStatus.TOO_EARLY).body(e.getLocalizedMessage());
-		}
-
-	}
-
-	@PostMapping("/verify")
-	public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam String otp) {
-		try {
-			boolean valid = otpService.validateOtp(email, otp);
-			if (valid) {
-
-				return ResponseEntity.ok("OTP verified");
-			}
-		} catch (Exception e) {
-			return new ResponseEntity<>(e.getLocalizedMessage(), HttpStatus.UNAUTHORIZED);
-		}
-		return null;
-
-	}
-
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam String otp) {
+        try {
+            boolean isValid = otpService.validateOtp(email, otp);
+            if (isValid) {
+                return ResponseEntity.ok("OTP verified");
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid OTP");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("OTP verification failed: " + e.getMessage());
+        }
+    }
 }
