@@ -7,8 +7,9 @@ export const AuthContext = createContext();
 // 3. Create the context provider component
 export const AuthProvider = ({ children }) => {
   // Keeps track of login status
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return !!localStorage.getItem('accessToken');
+  });
   // 4. Check if already logged in (on first load)
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
@@ -17,7 +18,9 @@ export const AuthProvider = ({ children }) => {
 
   // 5. Login function
   const login = (token) => {
-    localStorage.setItem('accessToken', token);
+    // ✅ Strip 'Bearer ' before storing, store only the raw token
+    const tokenValue = token.startsWith('Bearer ') ? token.split(' ')[1] : token;
+    localStorage.setItem('accessToken', tokenValue);
     setIsAuthenticated(true);
   };
 
@@ -25,6 +28,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('accessToken');
     setIsAuthenticated(false);
+    
   };
 
   // 7. Provide these values to children

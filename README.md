@@ -1,7 +1,8 @@
-🔐 SpringBoot JWT Authentication System with OTP Verification
+🔐 SpringBoot JWT Authentication System with OTP Verification + React Frontend
 -
 
-A robust and secure backend system built with Spring Boot, featuring OTP-based registration, JWT access & refresh token handling, token blacklisting with Redis, and secure role-based access — all optimized for production deployment.
+A robust and secure fullstack system built with Spring Boot for the backend and React.js for the frontend. It features OTP-based registration, JWT access & refresh token handling, token blacklisting with Redis, and secure role-based access — all optimized for production deployment.
+
 ---------------------------------------------------------------------------------
 📌 Features
 -
@@ -24,6 +25,8 @@ A robust and secure backend system built with Spring Boot, featuring OTP-based r
 
 🧱 Production-ready configuration (HTTPS, logging, secrets management)
 
+🖥️ React.js frontend with protected routes, toast notifications, and authentication context
+
 ------------------------------------------------------------------------------------
 🛠️ Tech Stack
 -
@@ -36,6 +39,9 @@ A robust and secure backend system built with Spring Boot, featuring OTP-based r
 | Email       | Jakarta Mail (SMTP)         |
 | Build Tool  | Maven                       |
 | Java        | Java 17+                    |
+| Frontend    | React.js, Tailwind CSS      |
+| Routing     | react-router-dom            |
+| Notification| react-toastify              |
 
 ----------------------------------------------------------
 📦 Prerequisites
@@ -50,6 +56,8 @@ A robust and secure backend system built with Spring Boot, featuring OTP-based r
 ✅ Docker (for Redis container)
 
 ✅ Internet connection (SMTP email service)
+
+✅ Node.js & npm (for frontend setup)
 
 --------------------
 🐳 Redis Setup with Docker
@@ -88,6 +96,14 @@ cors.allowed.credentials=true
 🧱 Module Structure
 --------------------
 
+### Backend
+- config, filters, security, service, controller, repository, entity, utils
+
+### Frontend (React.js)
+- `/pages`: Login, Register, Dashboard
+- `/components`: Header, Footer, ProtectedRoute, LoadingSpinner
+- `/context`: AuthContext
+- `/App.jsx`: Routing setup with conditional footer and toast messages
 
 🔐 Authentication Flow
 --------------
@@ -145,8 +161,27 @@ public ResponseEntity<?> getAdminData() {
 
 🛡️ Token revocation and Redis TTLs for cleanup
 
------------------------
+-------------------------------------------
+🌐 React Frontend Highlights
+----
 
+✅ AuthContext using Context API and localStorage persistence
+
+✅ Protected routes for `/dashboard`
+
+✅ Styled and animated `LoadingSpinner` using Tailwind
+
+✅ Footer shown only on login page
+
+✅ JWT token shown securely on dashboard (overflow handled)
+
+✅ Custom button styles on Register
+
+✅ Responsive layout with Tailwind and custom CSS
+
+✅ Toast notifications for login/register success and errors
+
+-----------------------
 ✅ Completed ✅
 ---
 ✅ OTP Registration Flow
@@ -163,19 +198,19 @@ public ResponseEntity<?> getAdminData() {
 
 ✅ CORS Configuration
 
+✅ React Integration with Routing, Auth Context, and Styling
 
 🧩 To Do (Optional Enhancements)
 ---
- Add Swagger/OpenAPI documentation
+Add Swagger/OpenAPI documentation
 
- Add logging (SLF4J, Logback) — In Progress
+Add logging (SLF4J, Logback) — In Progress
 
- Enable HTTPS (during production deployment)
+Enable HTTPS (during production deployment)
 
- Add monitoring (Prometheus/Grafana optional)
+Add monitoring (Prometheus/Grafana optional)
 
- React.js frontend integration
-
+Handle persistent login state after page refresh in frontend
 
 🧑‍💻 Author
 --

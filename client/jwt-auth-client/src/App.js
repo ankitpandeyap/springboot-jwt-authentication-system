@@ -6,12 +6,16 @@ import Register from './pages/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import { useLocation } from 'react-router-dom';
 import Footer from './components/Footer';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import './App.css'
 
 export default function App() {
   const location = useLocation(); // 🔍 Detect current route
 
   return (
     <>
+   
     <Routes>
       <Route path="/" element={<Navigate to="/login" />} />
       <Route path="/register" element={<Register />} />
@@ -26,6 +30,7 @@ export default function App() {
       />
     </Routes>
    {location.pathname === '/login' && <Footer />}
+   <ToastContainer position="top-center" autoClose={1000} />
    </>
   );
 }

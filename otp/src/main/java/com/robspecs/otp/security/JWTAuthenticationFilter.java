@@ -75,7 +75,7 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 		} catch (Exception e) {
 			request.setAttribute("custom-error", e.getMessage());
 			request.setAttribute("custom-exception", e.getClass().getName());
-			throw new BadCredentialsException("INTERNAL ERROR");
+			throw new BadCredentialsException(e.getLocalizedMessage());
 		}
 	}
 }

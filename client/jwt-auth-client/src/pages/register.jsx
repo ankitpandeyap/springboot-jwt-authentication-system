@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import '../css/Register.css'
 import { useNavigate } from 'react-router-dom';
-
+import { toast } from 'react-toastify';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -10,7 +10,7 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState(1);
-  const [message, setMessage] = useState('');
+
   const [otpVerified, setOtpVerified] = useState(false);
   const [role, setRole] = useState('CONSUMER');
   const navigate = useNavigate();
@@ -19,10 +19,10 @@ export default function Register() {
     e.preventDefault();
     try {
       const res = await axiosInstance.post(`/auth/otp/request?email=${encodeURIComponent(email)}`);
-      setMessage(res.data.message);
+      toast.success(res.data.message);
       setStep(2);
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Failed to send OTP');
+      toast.error(err.response?.data?.message || 'Failed to send OTP');
     }
   };
 
@@ -32,22 +32,21 @@ export default function Register() {
       const res = await axiosInstance.post(
         `/auth/otp/verify?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`
       );
-      setMessage(res.data);
+      toast.success(res.data);
       if (res.data.trim() === 'OTP verified') {
         setOtpVerified(true);
         setStep(3);
-        console.log('OTP Verified:', otpVerified); // Log the state value
-        console.log('Step:', step); // Log the state value
+
       }
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Invalid OTP');
+      toast.error(err.response?.data?.message || 'Invalid OTP');
     }
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
     if (!otpVerified) {
-      setMessage('Please verify OTP first.');
+      toast.error('Please verify OTP first.');
       return;
     }
     try {
@@ -57,11 +56,11 @@ export default function Register() {
         password,
         role, // Include the selected role
       });
-      setMessage('Registration successful!');
+      toast.success('Registration successful!');
       navigate('/login');
 
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Registration failed');
+      toast.error(err.response?.data?.message || 'Registration failed');
     }
   };
 
@@ -73,9 +72,9 @@ export default function Register() {
           {step === 2 && 'Step 2: Verify OTP'}
           {step === 3 && 'Step 3: Complete Registration'}
         </h2>
-  
-        {message && <div className="register-message">{message}</div>}
-  
+
+
+
         {step === 1 && (
           <form onSubmit={handleSendOtp} className="register-form">
             <input
@@ -85,10 +84,15 @@ export default function Register() {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-            <button className="send-otp">Send OTP</button>
+            <button
+              type="submit"
+              className="btn-primary otp-button"
+            >
+              Send OTP
+            </button>
           </form>
         )}
-  
+
         {step === 2 && (
           <form onSubmit={handleVerifyOtp} className="register-form">
             <input
@@ -98,10 +102,15 @@ export default function Register() {
               onChange={(e) => setOtp(e.target.value)}
               required
             />
-            <button className="verify-otp">Verify OTP</button>
+            <button
+              type="submit"
+              className="btn-primary otp-button"
+            >
+              Verify OTP
+            </button>
           </form>
         )}
-  
+
         {step === 3 && otpVerified && (
           <form onSubmit={handleRegister} className="register-form">
             <input
@@ -118,7 +127,7 @@ export default function Register() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-              <select
+            <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
               className="register-dropdown"
@@ -126,7 +135,12 @@ export default function Register() {
               <option value="CONSUMER">Consumer</option>
               <option value="ADMIN">Admin</option>
             </select>
-            <button className="complete-register">Complete Registration</button>
+            <button
+              type="submit"
+              className="btn-primary complete-register"
+            >
+              Complete Registration
+            </button>
           </form>
         )}
       </div>

@@ -1,4 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useContext } from 'react';
+import { AuthContext } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import '../css/Dashboard.css'
 
 export default function Dashboard() {
   const [token, setToken] = useState('');
@@ -9,15 +14,30 @@ export default function Dashboard() {
     setToken(savedToken || 'No token found');
   }, []);
 
+  const { logout } = useContext(AuthContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    toast.success('Logged out successfully');
+    navigate('/login');
+  };
+
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-green-100">
-      <div className="bg-white p-8 rounded-xl shadow-xl text-center w-full max-w-md">
+    <div className="dashboard-container">
+      <div className="dashboard-box">
+
         <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
         <p className="text-lg text-gray-700 mb-4">Welcome! 🎉</p>
         <p className="text-sm break-words text-gray-500">
           <strong>Access Token:</strong><br /> {token}
         </p>
+        <button className="logout-btn" onClick={handleLogout}>
+      Logout
+    </button>
       </div>
     </div>
+
   );
 }
