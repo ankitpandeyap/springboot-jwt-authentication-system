@@ -1,6 +1,9 @@
 package com.robspecs.otp.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.springframework.security.config.Customizer.withDefaults;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -59,6 +62,7 @@ public class SecurityConfig {
 		JWTRefreshFilter jwtRefreshFilter =  new JWTRefreshFilter(authenticationManager, jwtUtils, customUserDetailsService,tokenService);
 		
 		return http.csrf(AbstractHttpConfigurer::disable)
+				.cors(withDefaults())
 				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.exceptionHandling(exception -> exception.authenticationEntryPoint(jwtAuthenticationEntryPoint)
 						.accessDeniedHandler(accessDeniedHandler()))

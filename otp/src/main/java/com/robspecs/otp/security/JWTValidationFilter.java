@@ -1,6 +1,7 @@
 package com.robspecs.otp.security;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -47,9 +48,19 @@ public class JWTValidationFilter extends OncePerRequestFilter {
 		this.tokenService = tokenService;
 	}
 
+	private static final List<String> PUBLIC_URLS = List.of("/api/auth/login", "/api/auth/refresh", "/api/auth/signup",
+			"/api/auth/register", "/api/auth/otp/verify", "/api/auth/otp/request");
+
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
+
+		String path = request.getRequestURI();
+
+		if (PUBLIC_URLS.contains(path)) {
+			filterChain.doFilter(request, response);
+			return;
+		}
 
 		try {
 			String token = extractTokenFromRequest(request);

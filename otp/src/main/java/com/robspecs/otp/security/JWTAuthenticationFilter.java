@@ -68,12 +68,14 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 				response.addCookie(refreshCookie);
 				response.setContentType("application/json");
 				response.getWriter().write("{\"message\":\"Login successful\"}");
+			
+				
 			}
 
 		} catch (Exception e) {
 			request.setAttribute("custom-error", e.getMessage());
 			request.setAttribute("custom-exception", e.getClass().getName());
-			throw new BadCredentialsException("Refresh token failure");
+			throw new BadCredentialsException("INTERNAL ERROR");
 		}
 	}
 }

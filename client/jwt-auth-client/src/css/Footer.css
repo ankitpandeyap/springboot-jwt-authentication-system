@@ -1,0 +1,34 @@
+.register-footer {
+  background-color: #f8f9fa; /* Light gray background */
+  color: #007bff; /* Primary blue link color */
+  padding: 1.5rem 1rem; /* Comfortable padding */
+  text-align: center; /* Center the link */
+  border-top: 1px solid #dee2e6; /* Subtle top border */
+  font-size: 1rem; /* Readable font size */
+}
+
+.register-footer a {
+  color: inherit; /* Inherit color from the footer */
+  text-decoration: none; /* Remove underline */
+  font-weight: bold; /* Make the link stand out */
+  transition: color 0.3s ease-in-out;
+}
+
+.register-footer a:hover {
+  color: #0056b3; /* Darker blue on hover */
+  text-decoration: underline; /* Add underline on hover for better feedback */
+}
+
+.register-footer {
+  background-color: #f8f9fa;
+  color: #007bff;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  border-top: 1px solid #dee2e6;
+  font-size: 1rem;
+  position: fixed; /* Fix the footer to the viewport */
+  bottom: 0; /* Stick it to the bottom */
+  left: 0; /* Extend to the left edge */
+  width: 100%; /* Extend to the right edge */
+  z-index: 10; /* Ensure it's above other content if needed */
+}

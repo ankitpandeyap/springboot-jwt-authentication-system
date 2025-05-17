@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import axiosInstance from '../api/axiosInstance';
 import '../css/Register.css'
+import { useNavigate } from 'react-router-dom';
 
 
 export default function Register() {
@@ -11,11 +12,13 @@ export default function Register() {
   const [step, setStep] = useState(1);
   const [message, setMessage] = useState('');
   const [otpVerified, setOtpVerified] = useState(false);
+  const [role, setRole] = useState('CONSUMER');
+  const navigate = useNavigate();
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
     try {
-      const res = await axiosInstance.post('/auth/otp/request', { email });
+      const res = await axiosInstance.post(`/auth/otp/request?email=${encodeURIComponent(email)}`);
       setMessage(res.data.message);
       setStep(2);
     } catch (err) {
@@ -26,11 +29,15 @@ export default function Register() {
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     try {
-      const res = await axiosInstance.post('/auth/verify', { email, otp });
-      setMessage(res.data.message);
-      if (res.data.message === 'Otp verified') {
+      const res = await axiosInstance.post(
+        `/auth/otp/verify?email=${encodeURIComponent(email)}&otp=${encodeURIComponent(otp)}`
+      );
+      setMessage(res.data);
+      if (res.data.trim() === 'OTP verified') {
         setOtpVerified(true);
         setStep(3);
+        console.log('OTP Verified:', otpVerified); // Log the state value
+        console.log('Step:', step); // Log the state value
       }
     } catch (err) {
       setMessage(err.response?.data?.message || 'Invalid OTP');
@@ -48,8 +55,11 @@ export default function Register() {
         email,
         username,
         password,
+        role, // Include the selected role
       });
       setMessage('Registration successful!');
+      navigate('/login');
+
     } catch (err) {
       setMessage(err.response?.data?.message || 'Registration failed');
     }
@@ -108,6 +118,14 @@ export default function Register() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+              <select
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              className="register-dropdown"
+            >
+              <option value="CONSUMER">Consumer</option>
+              <option value="ADMIN">Admin</option>
+            </select>
             <button className="complete-register">Complete Registration</button>
           </form>
         )}

@@ -26,7 +26,8 @@ class CORSConfig implements WebMvcConfigurer {
 	public void addCorsMappings(CorsRegistry registry) {
 		// TODO Auto-generated method stub
 		registry.addMapping("/**").allowCredentials(allowedCredentials).allowedHeaders(allowedHeaders)
-				.allowedMethods(allowedMethods).allowedOrigins(allowedOrigins).maxAge(3600);
+				.allowedMethods(allowedMethods).allowedOrigins(allowedOrigins).maxAge(3600)
+				.exposedHeaders("Authorization");
 
 	}
 
