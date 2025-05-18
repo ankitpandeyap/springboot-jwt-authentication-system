@@ -107,24 +107,8 @@ button[type="submit"]:hover {
   text-decoration: underline;
 }
 
-@media (max-width: 480px) {
-  .register-box {
-    padding: 25px 20px;
-    border-radius: 10px;
-  }
-
-  .register-box h1 {
-    font-size: 24px;
-  }
-
-  .login-container,
-  .register-container {
-    padding-bottom: 100px;
-    /* Add space for the fixed footer */
-  }
-
-  .register-dropdown {
-  /* Base styles for the select element */
+/* Base styles for the select element (moved outside media query) */
+.register-dropdown {
   display: block; /* Make it take full width */
   width: 100%;
   padding: 12px 16px;
@@ -160,4 +144,23 @@ button[type="submit"]:hover {
   padding: 8px 12px;
 }
 
+@media (max-width: 480px) {
+  .register-box {
+    padding: 25px 20px;
+    border-radius: 10px;
+  }
+
+  .register-box h1 {
+    font-size: 24px;
+  }
+
+  .login-container,
+  .register-container {
+    padding-bottom: 100px;
+    /* Add space for the fixed footer */
+  }
+
+  /* You can add specific smaller screen adjustments for the dropdown here if needed */
+  /* For example, you might want to adjust padding or font size */
+  /* .register-dropdown { ... } */
 }

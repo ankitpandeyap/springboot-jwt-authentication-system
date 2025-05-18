@@ -5,7 +5,6 @@ target/
 .factorypath
 .env
 
-
 # RAR archives
 *.rar
 
