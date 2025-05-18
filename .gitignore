@@ -3,7 +3,7 @@ target/
 .metadata/
 .settings/
 .factorypath
-
+.env
 
 
 # RAR archives
@@ -78,7 +78,7 @@ ehthumbs.db
 *.cache
 
 # Environment variables
-#.env
+.env
 .env.local
 .env.development
 .env.production

@@ -122,4 +122,42 @@ button[type="submit"]:hover {
     padding-bottom: 100px;
     /* Add space for the fixed footer */
   }
+
+  .register-dropdown {
+  /* Base styles for the select element */
+  display: block; /* Make it take full width */
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border: 1px solid #dddddd; /* Light gray border, common in Airbnb */
+  border-radius: 12px; /* Slightly rounded corners */
+  font-size: 16px;
+  line-height: 1.5;
+  color: #222222; /* Dark gray text, typical for readability */
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  /* Remove default arrow styling for better customization */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg fill="%23222222" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+.register-dropdown:focus {
+  outline: none; /* Remove default focus outline */
+  border-color: #007bff; /* Airbnb blue for focus state */
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); /* Subtle focus shadow */
+}
+
+.register-dropdown option {
+  font-size: 16px;
+  color: #222222;
+  padding: 8px 12px;
+}
+
 }

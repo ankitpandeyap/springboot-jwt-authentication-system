@@ -127,7 +127,7 @@ export default function Register() {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <select
+             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
               className="register-dropdown"
