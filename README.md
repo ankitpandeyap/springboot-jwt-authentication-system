@@ -200,6 +200,8 @@ public ResponseEntity<?> getAdminData() {
 
 ✅ React Integration with Routing, Auth Context, and Styling
 
+----------------------------------------
+
 🧩 To Do (Optional Enhancements)
 ---
 Add Swagger/OpenAPI documentation
@@ -211,6 +213,19 @@ Enable HTTPS (during production deployment)
 Add monitoring (Prometheus/Grafana optional)
 
 Handle persistent login state after page refresh in frontend
+
+📸 Screenshots
+---------------
+![image](https://github.com/user-attachments/assets/56db6760-1160-427c-8e7e-8131c29d0f18)
+
+---
+
+![image](https://github.com/user-attachments/assets/055beb8b-1c1d-49ba-9795-2404a03218e3)
+
+-------
+![image](https://github.com/user-attachments/assets/93511eb6-0568-47bd-80ae-fefbf55f373c)
+
+--------------------------------
 
 🧑‍💻 Author
 --
